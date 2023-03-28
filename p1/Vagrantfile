@@ -1,0 +1,35 @@
+
+SERVER_IP = "192.168.56.110"
+WORKER_IP = "192.168.56.111"
+
+SERVER_HOSTNAME = "nenvoyS"
+WORKER_HOSTNAME = "nenvoySW"
+
+IMAGE = "generic/alpine311"
+
+MEMORY = "2048"
+CPUS = 2 
+
+Vagrant.configure("2") do |config|
+
+        config.vm.box = IMAGE
+        config.vm.provider "virtualbox" do |vb|
+            vb.memory = MEMORY
+            vb.cpus = CPUS
+        end
+
+        config.vm.define "nenvoyS" do |nenvoyS|
+            nenvoyS.vm.hostname = SERVER_HOSTNAME
+            nenvoyS.vm.synced_folder ".", "/vagrant"
+            nenvoyS.vm.network "private_network", ip: SERVER_IP
+            nenvoyS.vm.provision "shell", privileged: true, path: "scripts/k3s_master.sh", args: [SERVER_IP]
+
+        end
+
+        config.vm.define "nenvoySW" do |nenvoySW|
+            nenvoySW.vm.hostname = WORKER_HOSTNAME
+            nenvoySW.vm.synced_folder ".", "/vagrant"
+            nenvoySW.vm.network "private_network", ip: WORKER_IP
+            nenvoySW.vm.provision "shell", privileged: true, path: "scripts/k3s_slave.sh", args: [SERVER_IP, WORKER_IP]
+        end
+    end
