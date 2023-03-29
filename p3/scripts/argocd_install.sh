@@ -18,7 +18,7 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 while [[ $(kubectl get pods -n argocd -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True True True True True True True" ]]; \
  do echo "[INFO][ARGOCD]  Waiting all pods to be ready..." && sleep 10; done
 
-kubectl apply -f /vagrant/scripts/deployement.yaml 
+kubectl apply -f /vagrant/scripts/deployment.yaml
 
 while [[ $(kubectl get pods -n dev -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; \
  do echo "[INFO][DEV]  Waiting all pods to be ready..." && sleep 10; done
@@ -29,6 +29,6 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 echo "[INFO]  Doing port forwarding"
 
-kubectl port-forward --address 0.0.0.0 svc/argocd-server -n argocd 8080:443
+kubectl port-forward --address 0.0.0.0 svc/argocd-server -n argocd 8080:443 > /var/log/argocd-port-forward.log 2>&1 &
 
 echo "[INFO]  Access argocd at https://$1:8080"
